@@ -1,0 +1,123 @@
+### USER REGISTER 
+POST http://localhost:4000/users-api/users
+Content-Type: application/json
+
+{
+    "firstName":"Rakesh",
+    "lastName":"Babu",
+    "email":"raki@gmamil.com",
+    "password":"12345678",
+    "profileImageurl":"https://example.com/avatars/user.png"
+}
+
+### USER LOGIN
+
+POST http://localhost:4000/common-api/authenticate
+Content-Type: application/json
+
+{
+    "email":"raki@gmamil.com",
+    "password":"12345678"
+}
+
+### READING ARTICLES BY USER(PROTECTED)
+
+GET http://localhost:4000/users-api/articles
+
+### ADDING A COMMENT TO THE ARTICLE
+
+POST http://localhost:4000/users-api/comments/698a1179b79362aedb398f9b
+Content-Type: application/json
+
+{
+  "comment": "Great article!"
+}
+
+
+
+### AUTHOR REGISTER
+POST http://localhost:4000/author-api/users
+Content-Type: application/json
+
+{
+    "firstName":"Nelson",
+    "lastName":"Mandela",
+    "email":"mandela@gmail.com",
+    "password":"mandela@12345",
+    "profileImageurl":"https://example.com/avatars/author.png"
+}
+
+
+### AUTHOR LOGIN
+
+POST http://localhost:4000/common-api/authenticate
+Content-Type: application/json
+
+{
+    "email":"mandela@gmail.com",
+    "password":"mandela@12345",
+    "role":"AUTHOR"
+}
+
+
+### Create Article (AUTHOR)
+
+POST http://localhost:4000/author-api/articles
+Content-Type: application/json
+
+{
+  "author":"6989f8d6b449d9fee9e97b66",
+  "title":"JAVA",
+  "category":"Programming",
+  "content":"JAVA is an object oriented language"
+}
+
+
+### Read All Articles
+
+GET http://localhost:4000/author-api/articles/6989f8d6b449d9fee9e97b66
+
+
+### Edit article (AUTHOR)
+PUT http://localhost:4000/author-api/articles
+Content-Type: application/json
+
+{
+  "author":"6989f8d6b449d9fee9e97b66",
+  "articleId":"698a1179b79362aedb398f9b",
+  "title":"Python",
+  "category":"programming",
+  "content":"Python is a programming language"
+}
+
+### DELETE the article
+
+DELETE http://localhost:4000/author-api/delete-article/698a1179b79362aedb398f9b
+
+###Logout Route
+GET http://localhost:4000/common-api/logout
+
+
+
+###Checking invalid path
+GET http://localhost:4000/test
+
+
+###changing password
+PUT http://localhost:4000/common-api/change-password
+Content-Type: application/json
+
+{
+    "email":"raki@gmamil.com",
+    "password":"abcdefgh",
+    "newPassword":"12345678"
+}
+
+###READ ARTICLES BY ADMIN
+GET http://localhost:4000/admin-api/articles
+
+###BLOCKING USERS BY USERID
+PUT http://localhost:4000/admin-api/block-user/6989f7d3bbffee56863dfd73
+
+###UNBLOCKING USERS BY USERID
+PUT http://localhost:4000/admin-api/unblock-user/6989f7d3bbffee56863dfd73
