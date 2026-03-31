@@ -6,7 +6,7 @@ import {toast} from 'react-hot-toast'
 
 function Login() {
 
-  const { register, handleSubmit } = useForm()
+  const { register, handleSubmit, formState: { errors } } = useForm()
   const navigate = useNavigate()
 
   const login = useAuth((state) => state.login)
@@ -44,22 +44,33 @@ function Login() {
   return (
     <div className='flex flex-col gap-2 items-center justify-center mt-[10%] bg-gray-300 w-100 h-100 ml-[35%] rounded-2xl'>
 
-      <form onSubmit={handleLogin} className='flex flex-col gap-6 items-center'>
-        <p>Login</p>
+<form onSubmit={handleLogin} className='flex flex-col gap-4 items-center'>
+        <p className="mb-2">Login</p>
 
-        <input
-          type="email"
-          placeholder='Enter Email'
-          {...register("email", { required: true })}
-          className='w-70 bg-gray-400 p-2 rounded-xl'
-        />
+        <div className='flex flex-col gap-1 w-70'>
+          <input
+            type="email"
+            placeholder='Enter Email'
+            {...register("email", { 
+              required: "Email is required",
+              pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: "Invalid email format" }
+            })}
+            className='w-full bg-gray-400 p-2 rounded-xl'
+          />
+          {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
+        </div>
 
-        <input
-          type="password"
-          placeholder='Enter Password'
-          {...register("password", { required: true })}
-          className='w-70 bg-gray-400 p-2 rounded-xl'
-        />
+        <div className='flex flex-col gap-1 w-70 mb-2'>
+          <input
+            type="password"
+            placeholder='Enter Password'
+            {...register("password", { 
+              required: "Password is required"
+            })}
+            className='w-full bg-gray-400 p-2 rounded-xl'
+          />
+          {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
+        </div>
 
         
         {authError && <p className="text-red-600">{authError}</p>}

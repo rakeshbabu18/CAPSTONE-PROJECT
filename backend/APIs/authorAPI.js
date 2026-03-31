@@ -1,5 +1,6 @@
 import exp from 'express'
 import { register } from '../Services/authService.js'
+import { UserTypeModel } from '../Models/UserModel.js'
 import { ArticleModel } from '../Models/ArticleModel.js'
 import { verifyToken } from '../Middlewares/verifyToken.js'
 import { upload } from '../config/multer.js'
@@ -16,7 +17,18 @@ authorRoute.post('/users', upload.single("profileImageUrl"), async (req, res, ne
     try {
         //get user obj from req
         let userObj = req.body
-        
+
+        // Input validation
+        if (!userObj.firstName || !userObj.lastName || !userObj.email || !userObj.password) {
+            return res.status(400).json({ message: "All fields (firstName, lastName, email, password) are required" });
+        }
+
+        // Check for existing author/user
+        const existingUser = await UserTypeModel.findOne({ email: userObj.email });
+        if (existingUser) {
+            return res.status(409).json({ message: "User with this email already exists" });
+        }
+
         //  Step 1: upload image to cloudinary from memoryStorage (if exists)
         if (req.file) {
             cloudinaryResult = await uploadToCloudinary(req.file.buffer);

@@ -12,11 +12,17 @@ const setAllowedRoles = (roles) => (req, res, next) => {
 };
 
 //login
-commonRouter.post("/authenticate",async(req,res)=>{
+commonRouter.post("/authenticate",async(req,res,next)=>{
+    try {
+        //get user CRED object
+        let userCRED = req.body
         
-            //get user CRED object
-            let userCRED = req.body
-            //call authenticate service
+        // Input validation
+        if (!userCRED.email || !userCRED.password) {
+            return res.status(400).json({ message: "Email and password are required" });
+        }
+
+        //call authenticate service
             let { token,user } = await authenticate(userCRED)
             //save token as HTTPonly cookie
             res.cookie('token', token, {
@@ -37,7 +43,10 @@ commonRouter.post("/authenticate",async(req,res)=>{
         profileImageUrl: user.profileImageUrl || user.profileImageurl || null,
     }
 })
-    
+
+    } catch (err) {
+        next(err);
+    }
 })
 
 // create admin (protected by ADMIN_SECRET env)
@@ -56,7 +65,11 @@ commonRouter.post('/create-admin', async (req, res, next) => {
         if (adminSecret !== process.env.ADMIN_SECRET) {
             return res.status(403).json({ message: 'Invalid admin secret' });
         }
-
+        // Check for existing user
+        const existingUser = await UserTypeModel.findOne({ email });
+        if (existingUser) {
+            return res.status(409).json({ message: "User with this email already exists" });
+        }
         const newAdmin = await register({
             firstName,
             lastName,

@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router'
 
 function Registration() {
 
-  const { register, handleSubmit } = useForm()
+  const { register, handleSubmit, formState: { errors } } = useForm()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [preview, setPreview] = useState(null)
@@ -75,34 +75,53 @@ function Registration() {
         <div className='flex gap-3'>
           <p>Select Role</p>
 
-          <input type="radio" {...register("role", { required: true })} value="USER" />
+          <input type="radio" {...register("role", { required: "Role is required" })} value="USER" />
           User
 
-          <input type="radio" {...register("role", { required: true })} value="AUTHOR" />
+          <input type="radio" {...register("role", { required: "Role is required" })} value="AUTHOR" />
           Author
         </div>
+        {errors.role && <p className="text-red-500 text-sm">{errors.role.message}</p>}
 
-        <div className='flex gap-3'>
-          <input type="text" placeholder='Enter First name'
-            {...register("firstName", { required: true })}
-            className='w-40 bg-gray-400 p-2 rounded-xl'
-          />
+        <div className='flex flex-col gap-1'>
+          <div className='flex gap-3'>
+            <input type="text" placeholder='Enter First name'
+              {...register("firstName", { 
+                required: "First name is required", 
+                minLength: { value: 3, message: "Minimum 3 characters" } 
+              })}
+              className='w-40 bg-gray-400 p-2 rounded-xl'
+            />
 
-          <input type="text" placeholder='Enter Last name'
-            {...register("lastName")}
-            className='w-40 bg-gray-400 p-2 rounded-xl'
-          />
+            <input type="text" placeholder='Enter Last name'
+              {...register("lastName")}
+              className='w-40 bg-gray-400 p-2 rounded-xl'
+            />
+          </div>
+          {errors.firstName && <p className="text-red-500 text-sm">{errors.firstName.message}</p>}
         </div>
 
-        <input type="email" placeholder='Enter Email'
-          {...register("email", { required: true })}
-          className='w-80 bg-gray-400 p-2 rounded-xl'
-        />
+        <div className='flex flex-col gap-1 w-80'>
+          <input type="email" placeholder='Enter Email'
+            {...register("email", { 
+              required: "Email is required",
+              pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: "Invalid email format" }
+            })}
+            className='w-full bg-gray-400 p-2 rounded-xl'
+          />
+          {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
+        </div>
 
-        <input type="password" placeholder='Enter Password'
-          {...register("password", { required: true })}
-          className='w-80 bg-gray-400 p-2 rounded-xl'
-        />
+        <div className='flex flex-col gap-1 w-80'>
+          <input type="password" placeholder='Enter Password'
+            {...register("password", { 
+              required: "Password is required",
+              minLength: { value: 6, message: "Password must be at least 6 characters" }
+            })}
+            className='w-full bg-gray-400 p-2 rounded-xl'
+          />
+          {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
+        </div>
 
         <input
         type="file"

@@ -19,6 +19,17 @@ userRoute.post(
             try {
                 let userObj = req.body;
 
+                // Input validation
+                if (!userObj.firstName || !userObj.lastName || !userObj.email || !userObj.password) {
+                    return res.status(400).json({ message: "All fields (firstName, lastName, email, password) are required" });
+                }
+
+                // Check for existing user
+                const existingUser = await UserTypeModel.findOne({ email: userObj.email });
+                if (existingUser) {
+                    return res.status(409).json({ message: "User with this email already exists" });
+                }
+
                 //  Step 1: upload image to cloudinary from memoryStorage (if exists)
                 if (req.file) {
                 cloudinaryResult = await uploadToCloudinary(req.file.buffer);
