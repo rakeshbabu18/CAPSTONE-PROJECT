@@ -1,74 +1,111 @@
 import exp from 'express'
-import { register, authenticate } from '../Services/authService.js'
+import { register } from '../Services/authService.js'
 import { ArticleModel } from '../Models/ArticleModel.js'
-import { checkAuthor } from '../MiddeWares/checkAuthor.js'
-import { verifyToken } from '../MiddeWares/verifyToken.js'
+import { verifyToken } from '../Middlewares/verifyToken.js'
+import { upload } from '../config/multer.js'
+import { uploadToCloudinary } from '../config/cloudinaryUpload.js'
+import cloudinary from '../config/cloudinary.js'
 
 const authorRoute = exp.Router()
 
 //register author(public)
-authorRoute.post('/users', async (req, res) => {
+authorRoute.post('/users', upload.single("profileImageUrl"), async (req, res, next) => {
 
-    //get user obj from req
-    let userObj = req.body
-    //call the register function
-    const newUserObj = await register({
-        ...userObj,
-        role: "AUTHOR"
-    })
+    let cloudinaryResult;
 
-    res.status(201).json({
-        message: "Author created",
-        payload: newUserObj
-    })
+    try {
+        //get user obj from req
+        let userObj = req.body
+        
+        //  Step 1: upload image to cloudinary from memoryStorage (if exists)
+        if (req.file) {
+            cloudinaryResult = await uploadToCloudinary(req.file.buffer);
+        }
+
+        //call the register function
+        const newUserObj = await register({
+            ...userObj,
+            role: "AUTHOR",
+            profileImageUrl: cloudinaryResult?.secure_url,
+        })
+
+        res.status(201).json({
+            message: "Author created",
+            payload: newUserObj
+        })
+    } catch (err) {
+        // Step 2: rollback if upload failed
+        if (cloudinaryResult?.public_id) {
+            await cloudinary.uploader.destroy(cloudinaryResult.public_id);
+        }
+
+        next(err); // send to your error middleware
+    }
 })
 
 
+const setAllowedRoles = (roles) => (req, res, next) => {
+    req.allowedRoles = roles;
+    next();
+};
+
 //Create Article
-authorRoute.post('/articles',verifyToken,checkAuthor, async (req, res) => {
+authorRoute.post('/articles',setAllowedRoles(["AUTHOR"]), verifyToken,  async (req, res, next) => {
 
-    
-     //get article from req
-     let articleObj = req.body
+    try {
+        //get article from req
+        let articleObj = req.body
 
-     //create Article document
-     let newArticleDoc = new ArticleModel(articleObj)
-     //save the doc
-     let createdArticle = await newArticleDoc.save()
+        //create Article document
+        let newArticleDoc = new ArticleModel(articleObj)
+        //save the doc
+        let createdArticle = await newArticleDoc.save()
 
-     //send res
-     res.status(201).json({
-        message: "Article created",
-        createdArticle
-    })
+        //send res
+        res.status(201).json({
+            message: "Article created",
+            payload: createdArticle
+        })
+    } catch (err) {
+        next(err)
+    }
 })
 
 
 //Read Articles of author(protected route)
-authorRoute.get('/articles/:authorId',verifyToken,checkAuthor,async (req,res)=>{
+authorRoute.get('/articles/:authorId',setAllowedRoles(["AUTHOR"]), verifyToken, async (req,res)=>{
 
 
     //get author id
     let aid = req.params.authorId
 
-    //read articles by this author which are active
-    let articles = await ArticleModel.find({author:aid,isArticleActive:true}).populate("author", "firstName email")
+    // optionally include soft-deleted articles for author dashboard management
+    const includeInactive = req.query.includeInactive === "true";
+
+    const query = { author: aid };
+    if (!includeInactive) {
+        query.isArticleActive = true;
+    }
+
+    //read articles by this author
+    let articles = await ArticleModel.find(query).populate("author", "firstName lastName email")
     
     //send res
     res.status(200).json({message:"Articles",payload:articles})
 })
 
 //edit articles
-authorRoute.put('/articles',verifyToken, checkAuthor, async (req, res) => {
+authorRoute.put('/articles',setAllowedRoles(["AUTHOR"]), verifyToken,   async (req, res) => {
 
     //get modified article from req
-    let {  articleId, title, category, content,author } = req.body
+    let { articleId, title, category, content } = req.body
+    let currentUserId = req.user.userId;
 
-    //find article
-    let articleOfDB = await ArticleModel.findOne({_id: articleId,author: author})
+    //find article by ID and author ownership
+    let articleOfDB = await ArticleModel.findOne({_id: articleId, author: currentUserId})
 
     if (!articleOfDB) {
-        return res.status(401).json({ message: "Article not found" })
+        return res.status(404).json({ message: "Article not found or access denied" })
     }
 
     //update the article
@@ -77,7 +114,7 @@ authorRoute.put('/articles',verifyToken, checkAuthor, async (req, res) => {
         {
             $set: {title, category,content}
         },
-        {new : true} 
+        {new : true, runValidators: true} 
     )
 
     //send res
@@ -85,7 +122,7 @@ authorRoute.put('/articles',verifyToken, checkAuthor, async (req, res) => {
 })
 
 // Soft delete article 
-authorRoute.delete('/delete-article/:id', verifyToken, async (req, res) => {
+authorRoute.patch('/delete-article/:id', setAllowedRoles(["AUTHOR"]), verifyToken, async (req, res) => {
 
     let articleId = req.params.id;
 
@@ -97,7 +134,7 @@ authorRoute.delete('/delete-article/:id', verifyToken, async (req, res) => {
     }
 
     // check if logged-in user is the author of this article
-    if (article.author.toString() !== req.user.userid) {
+    if (article.author.toString() !== req.user.userId) {
         return res.status(403).json({ message: "Forbidden: You can delete only your articles" });
     }
 
@@ -109,6 +146,29 @@ authorRoute.delete('/delete-article/:id', verifyToken, async (req, res) => {
     //return res
     res.status(200).json({
         message: "Article deleted successfully"
+    });
+});
+
+// Restore soft deleted article
+authorRoute.patch('/retrieve-article/:id', setAllowedRoles(["AUTHOR"]), verifyToken, async (req, res) => {
+
+    let articleId = req.params.id;
+
+    let article = await ArticleModel.findById(articleId);
+
+    if (!article) {
+        return res.status(404).json({ message: "Article not found" });
+    }
+
+    if (article.author.toString() !== req.user.userId) {
+        return res.status(403).json({ message: "Forbidden: You can retrieve only your articles" });
+    }
+
+    article.isArticleActive = true;
+    await article.save();
+
+    res.status(200).json({
+        message: "Article retrieved successfully"
     });
 });
 

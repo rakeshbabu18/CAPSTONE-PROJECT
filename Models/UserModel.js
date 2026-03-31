@@ -17,7 +17,7 @@ const userSchema = new Schema({
         type:String,
         required:[true,"password is required"]
     },
-    profileImageurl:{
+    profileImageUrl:{
         type:String
     },
     role:{

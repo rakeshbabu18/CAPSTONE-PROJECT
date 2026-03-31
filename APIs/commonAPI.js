@@ -1,10 +1,15 @@
 import exp from 'express'
-import {authenticate} from '../Services/authService.js'
-import { verifyToken } from '../MiddeWares/verifyToken.js'
+import {authenticate, register} from '../Services/authService.js'
 import { UserTypeModel } from '../Models/UserModel.js'
 import bcrypt from 'bcryptjs'
+import { verifyToken } from '../Middlewares/verifyToken.js'
 
 export const commonRouter=exp.Router()
+
+const setAllowedRoles = (roles) => (req, res, next) => {
+    req.allowedRoles = roles;
+    next();
+};
 
 //login
 commonRouter.post("/authenticate",async(req,res)=>{
@@ -20,10 +25,56 @@ commonRouter.post("/authenticate",async(req,res)=>{
             secure: false
         })
         //send res
-        res.json({message: "Login successful",payload: user})
-    
+                const { _id, email, role, firstName, lastName } = user;
+        res.json({
+  message: "Login successful",
+    payload: {
+        userId: _id,
+        email,
+        role,
+        firstName,
+        lastName,
+        profileImageUrl: user.profileImageUrl || user.profileImageurl || null,
+    }
+})
     
 })
+
+// create admin (protected by ADMIN_SECRET env)
+commonRouter.post('/create-admin', async (req, res, next) => {
+    try {
+        const { firstName, lastName, email, password, profileImageUrl, profileImageurl, adminSecret } = req.body;
+
+        if (!firstName || !email || !password) {
+            return res.status(400).json({ message: 'firstName, email and password are required' });
+        }
+
+        if (!process.env.ADMIN_SECRET) {
+            return res.status(500).json({ message: 'ADMIN_SECRET is not configured on server' });
+        }
+
+        if (adminSecret !== process.env.ADMIN_SECRET) {
+            return res.status(403).json({ message: 'Invalid admin secret' });
+        }
+
+        const newAdmin = await register({
+            firstName,
+            lastName,
+            email,
+            password,
+            role: 'ADMIN',
+            profileImageUrl: profileImageUrl || profileImageurl,
+        });
+
+        res.status(201).json({
+            message: 'Admin created successfully',
+            payload: newAdmin,
+        });
+    } catch (err) {
+        next(err);
+    }
+});
+
 //logout
 commonRouter.get("/logout",async (req,res)=>{
         res.clearCookie('token',{
@@ -35,34 +86,44 @@ commonRouter.get("/logout",async (req,res)=>{
     res.json({message:"logout successfully"})
 })
 
-//changing password route
-commonRouter.put('/change-password', async (req, res) => {
+//changing password route (protected)
+commonRouter.put('/change-password', setAllowedRoles(["USER", "AUTHOR", "ADMIN"]), verifyToken, async (req, res, next) => {
+    try {
+        let userCRED = req.body;
 
-    let userCRED = req.body;
+        if (req.user.email !== userCRED.email) {
+            return res.status(403).json({ message: 'Cannot change password for another user' });
+        }
 
-    // call authenticate properly
-    let result = await authenticate({
-        email: userCRED.email,
-        password: userCRED.password
-    });
+        // call authenticate properly
+        let { user } = await authenticate({
+            email: userCRED.email,
+            password: userCRED.password
+        });
 
-    if (!result.user) {
-        return res.status(401).json({ message:"user not found" });
+        // get result document
+        let userDoc = await UserTypeModel.findOne({ email: user.email });
+
+        //hash the new password
+        let newHashedPassword = await bcrypt.hash(userCRED.newPassword, 10);
+
+        //insert the updated password into the document
+        userDoc.password = newHashedPassword;
+
+        //save the doc in the database
+        await userDoc.save();
+
+        //return res
+        res.status(200).json({ message: "Password updated successfully" });
+    } catch (err) {
+        next(err);
     }
-
-    // get result document
-    let userDoc = await UserTypeModel.findOne({ email: userCRED.email });
-
-    //hash the new password
-    let newHashedPassword = await bcrypt.hash(userCRED.newPassword, 10);
-
-    //insert the updated password into the document
-    userDoc.password = newHashedPassword;
-
-    //save the doc in the database
-    await userDoc.save();
-
-    //return res
-    res.status(200).json({ message: "Password updated successfully" });
 });
 
+//handling refresh
+commonRouter.get('/check-auth', setAllowedRoles(["USER", "AUTHOR", "ADMIN"]), verifyToken, async (req, res) => {
+    res.status(200).json({
+        message:"unauthorized",
+        payload:req.user
+    })
+});

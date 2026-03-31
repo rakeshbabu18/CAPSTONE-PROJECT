@@ -3,10 +3,10 @@ POST http://localhost:4000/users-api/users
 Content-Type: application/json
 
 {
-    "firstName":"Rakesh",
-    "lastName":"Babu",
-    "email":"raki@gmamil.com",
-    "password":"12345678",
+    "firstName":"sergio",
+    "lastName":"ramos",
+    "email":"sergio@gmamil.com",
+    "password":"sergio@134",
     "profileImageurl":"https://example.com/avatars/user.png"
 }
 
@@ -16,8 +16,8 @@ POST http://localhost:4000/common-api/authenticate
 Content-Type: application/json
 
 {
-    "email":"raki@gmamil.com",
-    "password":"12345678"
+    "email":"r@gmail.com",
+    "password":"123456789"
 }
 
 ### READING ARTICLES BY USER(PROTECTED)
@@ -26,12 +26,16 @@ GET http://localhost:4000/users-api/articles
 
 ### ADDING A COMMENT TO THE ARTICLE
 
-POST http://localhost:4000/users-api/comments/698a1179b79362aedb398f9b
+PUT http://localhost:4000/users-api/articles
 Content-Type: application/json
 
-{
-  "comment": "Great article!"
+{ "user":"69ae86f658895e962a185edc",
+   "articleId":"69ae8339db61f7722e961ef6",
+  "comment": "bad article!"
 }
+
+### READING ALL THE COMMENTS OF AN ARTICLE  
+GET http://localhost:4000/users-api/comments/69ae8e31631ddca3064aba36
 
 
 
@@ -40,10 +44,10 @@ POST http://localhost:4000/author-api/users
 Content-Type: application/json
 
 {
-    "firstName":"Nelson",
-    "lastName":"Mandela",
-    "email":"mandela@gmail.com",
-    "password":"mandela@12345",
+    "firstName":"ravi",
+    "lastName":"kumar",
+    "email":"ravi@gmail.com",
+    "password":"123456789",
     "profileImageurl":"https://example.com/avatars/author.png"
 }
 
@@ -54,8 +58,8 @@ POST http://localhost:4000/common-api/authenticate
 Content-Type: application/json
 
 {
-    "email":"mandela@gmail.com",
-    "password":"mandela@12345",
+    "email":"ravi@gmail.com",
+    "password":"123456789",
     "role":"AUTHOR"
 }
 
@@ -66,16 +70,16 @@ POST http://localhost:4000/author-api/articles
 Content-Type: application/json
 
 {
-  "author":"6989f8d6b449d9fee9e97b66",
-  "title":"JAVA",
+  "author":"69ae8b1435d1aa693da5eded",
+  "title":"Java Script",
   "category":"Programming",
-  "content":"JAVA is an object oriented language"
+  "content":"JS is an object oriented language"
 }
 
 
 ### Read All Articles
 
-GET http://localhost:4000/author-api/articles/6989f8d6b449d9fee9e97b66
+GET http://localhost:4000/author-api/articles/69ae8b1435d1aa693da5eded
 
 
 ### Edit article (AUTHOR)
@@ -92,7 +96,8 @@ Content-Type: application/json
 
 ### DELETE the article
 
-DELETE http://localhost:4000/author-api/delete-article/698a1179b79362aedb398f9b
+PATCH http://localhost:4000/author-api/delete-article/69ae8e31631ddca3064aba36
+ 
 
 ###Logout Route
 GET http://localhost:4000/common-api/logout
@@ -121,3 +126,25 @@ PUT http://localhost:4000/admin-api/block-user/6989f7d3bbffee56863dfd73
 
 ###UNBLOCKING USERS BY USERID
 PUT http://localhost:4000/admin-api/unblock-user/6989f7d3bbffee56863dfd73
+
+### CREATE ADMIN (requires ADMIN_SECRET set in backend .env)
+POST http://localhost:4000/common-api/create-admin
+Content-Type: application/json
+
+{
+  "firstName": "super",
+  "lastName": "admin",
+  "email": "admin@blogapp.com",
+  "password": "Admin@12345",
+  "profileImageUrl": "https://example.com/avatars/admin.png",
+  "adminSecret": "admin123"
+}
+
+### ADMIN LOGIN
+POST http://localhost:4000/common-api/authenticate
+Content-Type: application/json
+
+{
+  "email": "admin@blogapp.com",
+  "password": "Admin@12345"
+}

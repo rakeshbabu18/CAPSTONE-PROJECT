@@ -4,7 +4,7 @@ import {UserTypeModel} from '../Models/UserModel.js'
 
 // register function
 export const register = async (userObj) => {
-    const userDoc = new UserTypeModel({userObj})
+    const userDoc = new UserTypeModel(userObj)
 
     await userDoc.validate()
 
@@ -45,7 +45,7 @@ export const authenticate = async ({ email, password }) => {
 
 
     const token = jwt.sign(
-        { userid: user._id, email: user.email,role: user.role },
+        { userId: user._id, email: user.email, role: user.role, profileImageUrl: user.profileImageUrl},
         process.env.JWT_SECRET,
         { expiresIn: "1h" }
     );
