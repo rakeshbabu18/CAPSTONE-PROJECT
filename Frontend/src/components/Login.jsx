@@ -14,30 +14,36 @@ function Login() {
   const loading = useAuth((state) => state.loading)
 
   const handleLogin = handleSubmit(async (data) => {
-    const user = await login(data)
+    try {
+      const user = await login(data)
 
-    if (!user) {
-      console.error("Login failed - no user returned")
-      return
-    }
+      if (!user) {
+        // The error is already handled and set in the store
+        console.error("Login failed - no user returned")
+        return
+      }
 
-    console.log("Login successful, user data:", user)
-    toast.success("Logged in successfully")
-    
-    const userRole = String(user.role || "").trim().toUpperCase()
-    console.log("User role:", userRole)
+      console.log("Login successful, user data:", user)
+      toast.success("Logged in successfully")
+      
+      const userRole = String(user.role || "").trim().toUpperCase()
+      console.log("User role:", userRole)
 
-    if (userRole === "USER") {
-      console.log("Navigating to /userDashboard")
-      navigate("/userDashboard")
-    } else if (userRole === "AUTHOR") {
-      console.log("Navigating to /author-profile")
-      navigate("/author-profile")
-    } else if (userRole === "ADMIN") {
-      console.log("Navigating to /admin-dashboard")
-      navigate("/admin-dashboard")
-    } else {
-      console.warn("Unknown role:", user.role)
+      if (userRole === "USER") {
+        console.log("Navigating to /userDashboard")
+        navigate("/userDashboard")
+      } else if (userRole === "AUTHOR") {
+        console.log("Navigating to /author-profile")
+        navigate("/author-profile")
+      } else if (userRole === "ADMIN") {
+        console.log("Navigating to /admin-dashboard")
+        navigate("/admin-dashboard")
+      } else {
+        console.warn("Unknown role:", user.role)
+      }
+    } catch (error) {
+       console.error("Unexpected login error:", error)
+       toast.error("An unexpected error occurred during login")
     }
   })
 
