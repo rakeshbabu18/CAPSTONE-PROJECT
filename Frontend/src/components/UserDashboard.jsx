@@ -9,6 +9,10 @@ function UserDashboard() {
   const [loading, setLoading] =useState(false)
   const [error, setError] = useState(null)
 
+  React.useEffect(() => {
+    onreadArticles();
+  }, []);
+
   const openArticle = (article) => {
     navigate(`/article/${article._id}`, {
       state: article,
