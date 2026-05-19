@@ -73,7 +73,6 @@ userRoute.get('/articles', setAllowedRoles(["USER", "AUTHOR"]), verifyToken, asy
     let articles = await ArticleModel
         .find({ isArticleActive: true })
         .populate("author", "firstName lastName")
-        .select("-content") // Exclude content for list view for better performance
         .sort({ createdAt: -1 });
 
     if (!articles) {
