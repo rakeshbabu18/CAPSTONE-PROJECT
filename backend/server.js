@@ -11,7 +11,10 @@ config(); //process .env
 
 const app=exp()
 
-app.use(cors({origin:["http://localhost:5173"],credentials:true}))
+app.use(cors({
+  origin: ["https://capstone-project-1-4dn6.onrender.com"],
+  credentials: true
+}))
 
 
 
@@ -30,8 +33,9 @@ app.use('/common-api',commonRouter)
         try{
         await connect(process.env.DB_URL)
 
-        app.listen(process.env.PORT,()=>{
-         console.log(`Server running on port ${process.env.PORT}`)
+        const port = process.env.PORT || 4000;
+        app.listen(port,()=>{
+         console.log(`Server running on port ${port}`)
          console.log(`connection successful`)
         })
     }catch(err){
