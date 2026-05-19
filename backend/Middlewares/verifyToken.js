@@ -17,6 +17,9 @@ export const verifyToken = (req, res, next) => {
     }
     //verify the validity of the token( decoding the token)
     let decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    
+    console.log("Decoded Token Role:", decodedToken.role);
+    console.log("Allowed Roles:", allowedRoles);
 
     if (!allowedRoles.includes(decodedToken.role)) {
       return res
@@ -24,7 +27,7 @@ export const verifyToken = (req, res, next) => {
         .json({ message: "Forbidden, you don't have permission" });
     }
 
-    //attacg user info to req for use in routes
+    //attach user info to req for use in routes
     req.user = decodedToken;
 
     //forward req to next middleware/route

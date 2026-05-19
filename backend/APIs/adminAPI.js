@@ -87,5 +87,40 @@ adminRoute.put('/unblock-user/:id', verifyToken, async (req, res, next) => {
 });
 
 
+// soft delete article
+adminRoute.put('/delete-article/:id', verifyToken, async (req, res, next) => {
+    try {
+        const article = await ArticleModel.findById(req.params.id);
+
+        if (!article) {
+            return res.status(404).json({ message: 'Article not found' });
+        }
+
+        article.isArticleActive = false;
+        await article.save();
+
+        res.status(200).json({ message: 'Article deleted successfully' });
+    } catch (err) {
+        next(err);
+    }
+});
+
+// restore article
+adminRoute.put('/restore-article/:id', verifyToken, async (req, res, next) => {
+    try {
+        const article = await ArticleModel.findById(req.params.id);
+
+        if (!article) {
+            return res.status(404).json({ message: 'Article not found' });
+        }
+
+        article.isArticleActive = true;
+        await article.save();
+
+        res.status(200).json({ message: 'Article restored successfully' });
+    } catch (err) {
+        next(err);
+    }
+});
 
 export default adminRoute

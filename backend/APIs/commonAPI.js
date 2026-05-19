@@ -34,6 +34,7 @@ commonRouter.post("/authenticate",async(req,res,next)=>{
                 const { _id, email, role, firstName, lastName } = user;
         res.json({
   message: "Login successful",
+  token,
     payload: {
         userId: _id,
         email,

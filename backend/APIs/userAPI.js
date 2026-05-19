@@ -81,7 +81,7 @@ userRoute.get('/articles', setAllowedRoles(["USER", "AUTHOR"]), verifyToken, asy
 
 
 //Read Article by ID (NEW ENDPOINT)
-userRoute.get('/article/:id', setAllowedRoles(["USER", "AUTHOR"]), verifyToken, async (req, res) => {
+userRoute.get('/article/:id', setAllowedRoles(["USER", "AUTHOR", "ADMIN"]), verifyToken, async (req, res) => {
     
     let articleId = req.params.id;
     
@@ -128,7 +128,7 @@ res.status(201).json({
 });
 
 //getting all the comments of an article
-userRoute.get('/comments/:articleId', setAllowedRoles(["USER", "AUTHOR"]), verifyToken, async (req, res) => {
+userRoute.get('/comments/:articleId', setAllowedRoles(["USER", "AUTHOR", "ADMIN"]), verifyToken, async (req, res) => {
 
     let articleId = req.params.articleId;
     let article = await ArticleModel.findById(articleId).populate("comments.user", "firstName lastName email");
