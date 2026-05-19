@@ -72,7 +72,10 @@ userRoute.get('/articles', setAllowedRoles(["USER", "AUTHOR"]), verifyToken, asy
 
     let articles = await ArticleModel
         .find({ isArticleActive: true })
-        .populate("comments.user", "firstName lastName email");
+        .populate("author", "firstName lastName")
+        .select("-content") // Exclude content for list view for better performance
+        .sort({ createdAt: -1 });
+
     if (!articles) {
         return res.status(401).json({ message: "Article not found" })
     }

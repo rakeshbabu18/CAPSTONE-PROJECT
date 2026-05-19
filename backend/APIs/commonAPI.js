@@ -28,23 +28,23 @@ commonRouter.post("/authenticate",async(req,res,next)=>{
         res.cookie('token', token, {
             httpOnly: true,
             sameSite: "None",
-            secure: true
+            secure: true,
+            maxAge: 24 * 60 * 60 * 1000 // 1 day
         })
         //send res
         const { _id, email, role, firstName, lastName } = user;
         res.json({
-  message: "Login successful",
-  token,
-    payload: {
-        userId: _id,
-        email,
-        role,
-        firstName,
-        lastName,
-        profileImageUrl: user.profileImageUrl || user.profileImageurl || null,
-    }
-})
-
+            message: "Login successful",
+            token,
+            payload: {
+                userId: _id,
+                email,
+                role,
+                firstName,
+                lastName,
+                profileImageUrl: user.profileImageUrl || user.profileImageurl || null,
+            }
+        })
     } catch (err) {
         next(err);
     }

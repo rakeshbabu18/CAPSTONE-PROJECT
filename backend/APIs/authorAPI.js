@@ -68,6 +68,14 @@ authorRoute.post('/articles',setAllowedRoles(["AUTHOR"]), verifyToken,  async (r
         //get article from req
         let articleObj = req.body
 
+        // Ensure the author ID in the article matches the authenticated user ID
+        if (articleObj.author && String(articleObj.author) !== String(req.user.userId)) {
+            return res.status(403).json({ message: "Forbidden: You cannot post articles for another author" });
+        }
+        
+        // Force sync author ID from token to body just in case
+        articleObj.author = req.user.userId;
+
         //create Article document
         let newArticleDoc = new ArticleModel(articleObj)
         //save the doc
