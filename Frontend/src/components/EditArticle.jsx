@@ -44,7 +44,7 @@ function EditArticle() {
 
     try {
       const res = await axios.put(
-        `http://localhost:4000/author-api/articles`,
+        `/author-api/articles`,
         { articleId: article._id, ...data },
         { withCredentials: true }
       );

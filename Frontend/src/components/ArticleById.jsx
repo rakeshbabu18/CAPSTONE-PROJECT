@@ -37,6 +37,7 @@ function ArticleByID() {
 
   const loggedInUserId = user?.userId || user?._id;
   const articleAuthorId = article?.author?._id || article?.author;
+  const isAdmin = String(user?.role || "").toUpperCase() === "ADMIN";
   const isAuthorOwner =
     String(user?.role || "").toUpperCase() === "AUTHOR" &&
     loggedInUserId &&
@@ -48,7 +49,7 @@ function ArticleByID() {
       setLoading(true);
 
       try {
-        const res = await axios.get(`http://localhost:4000/users-api/article/${id}`, { withCredentials: true });
+        const res = await axios.get(`/users-api/article/${id}`, { withCredentials: true });
 
         setArticle(res.data.payload);
       } catch (err) {
@@ -75,7 +76,7 @@ function ArticleByID() {
   const fetchComments = async () => {
     try {
       setCommentsLoading(true);
-      const res = await axios.get(`http://localhost:4000/users-api/comments/${id}`, { withCredentials: true });
+      const res = await axios.get(`/users-api/comments/${id}`, { withCredentials: true });
       setComments(res.data.payload || []);
     } catch (err) {
       toast.error(err.response?.data?.error || err.response?.data?.message || "Failed to load comments");
@@ -108,7 +109,7 @@ function ArticleByID() {
     try {
       setCommentLoading(true);
       await axios.put(
-        `http://localhost:4000/users-api/articles`,
+        `/users-api/articles`,
         { articleId: id, comment: trimmedComment },
         { withCredentials: true }
       );
@@ -122,16 +123,32 @@ function ArticleByID() {
     }
   };
 
-  // delete article
+  // delete article loop for author
   const deleteArticle = async () => {
     try {
-      await axios.patch(`http://localhost:4000/author-api/delete-article/${id}`, {}, { withCredentials: true });
+      await axios.patch(`/author-api/delete-article/${id}`, {}, { withCredentials: true });
 
       toast.success("Article deleted successfully");
       navigate("/author-profile");
     } catch (err) {
       toast.error(err.response?.data?.error || err.response?.data?.message || "Failed to delete article");
       setError(err.response?.data?.error);
+    }
+  };
+
+  const toggleAdminArticleStatus = async () => {
+    try {
+      if (article.isArticleActive !== false) {
+        await axios.put(`/admin-api/delete-article/${id}`, {}, { withCredentials: true });
+        toast.success("Article deleted successfully");
+        setArticle({ ...article, isArticleActive: false });
+      } else {
+        await axios.put(`/admin-api/restore-article/${id}`, {}, { withCredentials: true });
+        toast.success("Article restored successfully");
+        setArticle({ ...article, isArticleActive: true });
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.error || err.response?.data?.message || "Failed to update article status");
     }
   };
 
@@ -216,6 +233,19 @@ function ArticleByID() {
 
           <button className={deleteBtn} onClick={deleteArticle}>
             Delete
+          </button>
+        </div>
+      )}
+
+      {/* ADMIN actions */}
+      {isAdmin && (
+        <div className={articleActions}>
+          <button 
+            className={deleteBtn} 
+            onClick={toggleAdminArticleStatus}
+            style={{ backgroundColor: article.isArticleActive !== false ? '#ef4444' : '#10b981' }}
+          >
+            {article.isArticleActive !== false ? 'Delete Article' : 'Restore Article'}
           </button>
         </div>
       )}

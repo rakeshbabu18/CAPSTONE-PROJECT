@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import axios from 'axios'
 
-const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+const apiUrl = 'https://capstone-project-1-4dn6.onrender.com/'
 axios.defaults.baseURL = apiUrl
 
 export const useAuth = create(

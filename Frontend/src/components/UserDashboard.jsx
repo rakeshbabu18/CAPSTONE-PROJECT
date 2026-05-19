@@ -19,7 +19,7 @@ function UserDashboard() {
     try {
       setLoading(true);
       setError(null);
-      let res = await axios.get("http://localhost:4000/users-api/articles", {
+      let res = await axios.get("/users-api/articles", {
         withCredentials:true
       });
       setArticles(res.data.payload || []);

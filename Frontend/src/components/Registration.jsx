@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import axios from "axios"
 import { useNavigate } from 'react-router'
+import { toast } from 'react-hot-toast'
 
 function Registration() {
 
@@ -26,13 +27,14 @@ function Registration() {
         if (profileImageUrl?.[0]) {
           formData.append("profileImageUrl", profileImageUrl[0]);
         }
+        toast.success("Registration successful, redirecting to login...");
 
     try {
 
       if (data.role === "USER") {
 
         let res = await axios.post(
-          "http://localhost:4000/users-api/users",
+          "/users-api/users",
           formData
         )
 
@@ -43,7 +45,7 @@ function Registration() {
       } else if (data.role === "AUTHOR") {
 
         let res = await axios.post(
-          "http://localhost:4000/author-api/users",
+          "/author-api/users",
           formData
         )
 

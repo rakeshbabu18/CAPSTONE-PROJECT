@@ -26,32 +26,49 @@ function AdminDashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [updatingUserId, setUpdatingUserId] = useState(null)
+  const [updatingArticleId, setUpdatingArticleId] = useState(null)
   const [activeTab, setActiveTab] = useState('users') // 'users' or 'articles'
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true)
+      const res = await axios.get('/admin-api/users', { withCredentials: true })
+      setUsers(res.data.payload || [])
+    } catch (err) {
+      toast.error('Failed to load users')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const fetchArticles = async () => {
+    try {
+      setLoading(true)
+      const res = await axios.get('/admin-api/articles', { withCredentials: true })
+      setArticles(res.data.payload || [])
+    } catch (err) {
+      toast.error('Failed to load articles')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
     const loadDashboard = async () => {
       try {
-        setLoading(true)
         setError(null)
-
-        const [usersRes, articlesRes] = await Promise.all([
-          axios.get('/admin-api/users', { withCredentials: true }),
-          axios.get('/admin-api/articles', { withCredentials: true }),
-        ])
-
-        setUsers(usersRes.data.payload || [])
-        setArticles(articlesRes.data.payload || [])
+        if (activeTab === 'users') {
+          await fetchUsers()
+        } else if (activeTab === 'articles') {
+          await fetchArticles()
+        }
       } catch (err) {
-        const message = err.response?.data?.message || 'Failed to load admin dashboard'
-        setError(message)
-        toast.error(message)
-      } finally {
-        setLoading(false)
+        setError('Failed to load dashboard')
       }
     }
 
     loadDashboard()
-  }, [])
+  }, [activeTab])
 
   const openArticle = (article) => {
     navigate(`/article/${article._id}`, {
@@ -78,6 +95,30 @@ function AdminDashboard() {
       toast.error(err.response?.data?.message || 'Failed to update user status')
     } finally {
       setUpdatingUserId(null)
+    }
+  }
+
+  const toggleArticleStatus = async (article) => {
+    try {
+      setUpdatingArticleId(article._id)
+
+      if (article.isArticleActive !== false) {
+        // currently active, so delete it
+        await axios.put(`/admin-api/delete-article/${article._id}`, {}, { withCredentials: true })
+        toast.success('Article deleted successfully')
+      } else {
+        // currently deleted, so restore it
+        await axios.put(`/admin-api/restore-article/${article._id}`, {}, { withCredentials: true })
+        toast.success('Article restored successfully')
+      }
+
+      setArticles((prev) =>
+        prev.map((item) => (item._id === article._id ? { ...item, isArticleActive: item.isArticleActive === false ? true : false } : item))
+      )
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to update article status')
+    } finally {
+      setUpdatingArticleId(null)
     }
   }
 
@@ -112,9 +153,20 @@ function AdminDashboard() {
               <button className={ghostBtn} onClick={() => openArticle(article)}>
                 Read Article →
               </button>
-              <span className={`text-xs font-semibold uppercase tracking-wide px-2.5 py-1 rounded-full border ${article.isArticleActive !== false ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200'}`}>
-                {article.isArticleActive !== false ? 'Active' : 'Deleted'}
-              </span>
+              
+              <div className="flex items-center gap-3">
+                <button
+                  disabled={updatingArticleId === article._id}
+                  onClick={() => toggleArticleStatus(article)}
+                  className={`text-xs font-semibold uppercase tracking-wide px-3 py-1.5 rounded border transition-colors ${
+                    article.isArticleActive !== false 
+                      ? 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100' 
+                      : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+                  }`}
+                >
+                  {updatingArticleId === article._id ? '...' : (article.isArticleActive !== false ? 'Delete' : 'Restore')}
+                </button>
+              </div>
             </div>
           </div>
         ))}
