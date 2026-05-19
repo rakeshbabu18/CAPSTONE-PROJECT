@@ -7,7 +7,13 @@ import authorRoute from './APIs/authorAPI.js'
 import { commonRouter}  from './APIs/commonAPI.js'
 import cookieParser from "cookie-parser"
 import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
 config(); //process .env
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app=exp()
 
@@ -27,6 +33,9 @@ app.use('/author-api',authorRoute)
 app.use('/admin-api',adminRoute)
 app.use('/common-api',commonRouter)
 
+// Serve frontend static files
+app.use(exp.static(path.join(__dirname, '../Frontend/dist')));
+
 //connect to database
 
     const connection=async()=>{
@@ -44,6 +53,18 @@ app.use('/common-api',commonRouter)
     }
 }
 connection()
+
+// Fallback to index.html for React Router (Single Page Application)
+app.get('*', (req, res, next) => {
+    // Check if the request is for an API
+    if (req.url.startsWith('/users-api') || 
+        req.url.startsWith('/author-api') || 
+        req.url.startsWith('/admin-api') || 
+        req.url.startsWith('/common-api')) {
+        return next();
+    }
+    res.sendFile(path.join(__dirname, '../Frontend/dist/index.html'));
+});
 
 //handling invalid path
 app.use((req,res)=>{
