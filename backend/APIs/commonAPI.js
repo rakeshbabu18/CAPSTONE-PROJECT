@@ -23,15 +23,15 @@ commonRouter.post("/authenticate",async(req,res,next)=>{
         }
 
         //call authenticate service
-            let { token,user } = await authenticate(userCRED)
-            //save token as HTTPonly cookie
-            res.cookie('token', token, {
+        let { token, user } = await authenticate(userCRED)
+        //save token as HTTPonly cookie
+        res.cookie('token', token, {
             httpOnly: true,
-            sameSite: "lax",
-            secure: false
+            sameSite: "None",
+            secure: true
         })
         //send res
-                const { _id, email, role, firstName, lastName } = user;
+        const { _id, email, role, firstName, lastName } = user;
         res.json({
   message: "Login successful",
   token,
