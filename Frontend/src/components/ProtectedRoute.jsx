@@ -14,7 +14,7 @@ function ProtectedRoute({ children, allowedRoles }) {
     return <Navigate to="/login" replace />;
   }
 
-  console.log("current user role", currentUser.role);
+  console.log("current user role", currentUser?.role);
   console.log("aloowed role", allowedRoles);
   console.log(allowedRoles.includes(currentUser?.role));
   //check roles

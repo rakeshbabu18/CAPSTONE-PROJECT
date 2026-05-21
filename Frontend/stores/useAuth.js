@@ -30,17 +30,20 @@ export const useAuth = create(
             // Use payload from backend response
             const userData = res.data.payload || res.data.user
             const token = res.data.token
-            localStorage.setItem("token", token)
+            
+            if (token) {
+              localStorage.setItem("token", token)
+            }
 
             // Ensure userData has role field
-            const userWithRole = {
+            const userWithRole = userData ? {
               ...userData,
               role: userData.role || ""
-            }
+            } : null
 
             set({
               currentUser: userWithRole,
-              isAuthenticated: true,
+              isAuthenticated: !!userWithRole,
               loading: false,
               error: null
             })
@@ -110,13 +113,14 @@ export const useAuth = create(
         try {
           const res = await axios.get("/common-api/check-auth", { withCredentials: true });
           if(res.status===200){
+            const userData = res.data.payload;
             set({
               loading:false,
               error:null,
-              currentUser: res.data.payload,
-              isAuthenticated: true
+              currentUser: userData || null,
+              isAuthenticated: !!userData
             })
-            console.log("Auth check successful, user data:", res.data.payload);
+            console.log("Auth check successful, user data:", userData);
           }
         } catch (err) {
           // If refresh fails, clear auth state
