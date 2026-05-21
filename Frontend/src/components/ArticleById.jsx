@@ -1,4 +1,4 @@
-import { useParams, useLocation, useNavigate } from "react-router";
+import { useParams, useLocation, useNavigate, Link } from "react-router";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useAuth } from "../../stores/useAuth";
@@ -49,7 +49,7 @@ function ArticleByID() {
       setLoading(true);
 
       try {
-        const res = await axios.get(`/users-api/article/${id}`, { withCredentials: true });
+        const res = await axios.get(`/users-api/article/${id}`);
 
         setArticle(res.data.payload);
       } catch (err) {
@@ -76,7 +76,7 @@ function ArticleByID() {
   const fetchComments = async () => {
     try {
       setCommentsLoading(true);
-      const res = await axios.get(`/users-api/comments/${id}`, { withCredentials: true });
+      const res = await axios.get(`/users-api/comments/${id}`);
       setComments(res.data.payload || []);
     } catch (err) {
       toast.error(err.response?.data?.error || err.response?.data?.message || "Failed to load comments");
@@ -179,7 +179,7 @@ function ArticleByID() {
       <div className={articleContent}>{article.content}</div>
 
       {/* Comment Section */}
-      {user && user.role === "USER" && (
+      {user && user.role === "USER" ? (
         <div className="mt-10">
           <h3 className="text-xl font-semibold mb-4">Leave a Comment</h3>
           <form onSubmit={submitComment} className="flex flex-col gap-3">
@@ -200,6 +200,13 @@ function ArticleByID() {
               </button>
             </div>
           </form>
+        </div>
+      ) : (
+        <div className="mt-10 p-4 bg-gray-50 rounded-lg border border-gray-100 text-center">
+          <p className="text-gray-500 italic">
+            You must be logged in as a <strong>User</strong> to post comments. 
+            <Link to="/login" className="text-blue-600 font-semibold hover:underline ml-1">Log in here</Link>.
+          </p>
         </div>
       )}
 

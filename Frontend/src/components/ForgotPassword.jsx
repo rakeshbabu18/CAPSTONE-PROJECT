@@ -12,13 +12,12 @@ function ForgotPassword() {
   const handlePasswordReset = handleSubmit(async (data) => {
     setLoading(true);
     try {
-      // In a real app, you'd call axios.put('/common-api/reset-password', data)
-      // Since we are simulating, we'll show success and redirect
-      console.log("Resetting password for:", data.email);
+      const res = await axios.post('/common-api/forgot-password', {
+        email: data.email,
+        newPassword: data.newPassword
+      });
       
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast.success("Password has been reset successfully. Please login with your new password.");
+      toast.success(res.data.message || "Password has been reset successfully. Please login with your new password.");
       navigate('/login');
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to reset password");

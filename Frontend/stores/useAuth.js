@@ -2,8 +2,12 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import axios from 'axios'
 
-const apiUrl = import.meta.env.VITE_API_URL || 'https://capstone-project-1-4dn6.onrender.com/'
-axios.defaults.baseURL = apiUrl
+// If we are in development, the vite proxy handles this. 
+// If in production, we might need the absolute URL or it might be served from the same domain.
+const apiUrl = import.meta.env.VITE_API_URL || ''
+if (apiUrl) {
+  axios.defaults.baseURL = apiUrl
+}
 
 export const useAuth = create(
   persist(
