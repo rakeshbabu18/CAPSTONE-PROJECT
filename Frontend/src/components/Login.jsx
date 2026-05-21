@@ -78,6 +78,16 @@ function Login() {
           {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
         </div>
 
+        <div className="text-right w-70 -mt-2 mb-2">
+          <button 
+            type="button" 
+            onClick={() => navigate('/forgot-password')}
+            className="text-sm text-blue-600 hover:underline bg-transparent border-none cursor-pointer p-0"
+          >
+            Forgot password?
+          </button>
+        </div>
+
         
         {authError && <p className="text-red-600">{authError}</p>}
         {loading && <p>Loading...</p>}

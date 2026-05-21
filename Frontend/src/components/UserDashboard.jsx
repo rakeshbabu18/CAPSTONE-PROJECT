@@ -2,9 +2,11 @@ import React, { useState } from 'react'
 import {toast} from 'react-hot-toast'
 import axios from 'axios'
 import { useNavigate } from 'react-router'
+import { useAuth } from '../../stores/useAuth'
 
 function UserDashboard() {
   const navigate = useNavigate()
+  const currentUser = useAuth((state) => state.currentUser)
   const [articles, setArticles] = useState([])
   const [loading, setLoading] =useState(false)
   const [error, setError] = useState(null)
@@ -39,20 +41,19 @@ function UserDashboard() {
   return (
     <div className="min-h-screen bg-gray-50 font-sans text-gray-800">
       {/* Navbar / Header */}
-      <nav className="bg-white shadow-sm border-b px-6 py-4 flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-800 tracking-tight">User Dashboard</h1>
-      </nav>
 
       <main className="max-w-7xl mx-auto px-6 py-8">
+        {/* Welcome Message */}
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-gray-900">
+            Welcome, <span className="text-blue-600">{currentUser?.firstName  }</span>!
+          </h2>
+          <p className="text-gray-500 mt-1">Explore the latest articles from our community.</p>
+        </div>
+
         {/* Action Header */}
         <div className="flex justify-between items-center mb-8">
            
-          <button 
-            onClick={onreadArticles} 
-            className="bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg px-6 py-2.5 rounded-lg font-medium transition-all"
-          >
-            Fetch Articles
-          </button>
         </div>
 
         {/* Status Messages */}
@@ -72,7 +73,7 @@ function UserDashboard() {
         
 
         {/* Articles Grid */}
-        {!loading && !error && articles.length > 0 && (
+        {!loading && !error && articles.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {articles.map((article) => (
               <div 
@@ -111,6 +112,18 @@ function UserDashboard() {
               </div>
             ))}
           </div>
+        ) : (
+          !loading && !error && (
+            <div className="text-center py-20 bg-white rounded-xl border-2 border-dashed border-gray-200">
+              <div className="text-gray-400 mb-3">
+                <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900">No articles found</h3>
+              <p className="text-gray-500">Check back later for new content.</p>
+            </div>
+          )
         )}
       </main>
     </div>

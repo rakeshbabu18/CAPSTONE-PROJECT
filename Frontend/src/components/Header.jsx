@@ -23,17 +23,6 @@ function Header() {
 
   return (
     <div className='flex justify-between items-center bg-red-500 h-25 p-5'>
-       <div className='bg-white border-2 w-25 h-25 rounded-[50%] flex items-center justify-center text-3xl'>
-        {profileImageUrl ? (
-          <img
-            src={profileImageUrl}
-            alt="Profile"
-            className="w-full h-full rounded-full object-cover"
-          />
-        ) : (
-          <span>BLOG</span>
-        )}
-       </div>
         <p className='text-3xl font-bold'>Blog App</p>
       <ul className='flex gap-10  text-xl font-medium'>
         <li>

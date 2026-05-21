@@ -14,6 +14,7 @@ import {Toaster} from 'react-hot-toast'
 import ProtectedRoute from './components/ProtectedRoute'
 import Unauthorized from './components/Unauthorized'
 import AdminDashboard from './components/AdminDashboard'
+import ForgotPassword from './components/ForgotPassword'
 
 
 function App() {
@@ -37,6 +38,10 @@ function App() {
         {
           path:'/login',
           element:<Login />
+        },
+        {
+          path:'/forgot-password',
+          element:<ForgotPassword />
         },
         {
           path:'/userDashboard',
