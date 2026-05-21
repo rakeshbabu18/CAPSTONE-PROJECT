@@ -67,34 +67,41 @@ const setAllowedRoles = (roles) => (req, res, next) => {
     next();
 };
 
-//Read Articles
-userRoute.get('/articles', setAllowedRoles(["USER", "AUTHOR"]), verifyToken, async (req, res) => {
+//Read Articles (Publicly accessible)
+userRoute.get('/articles', async (req, res) => {
+    console.log("GET /articles request received");
+    try {
+        let articles = await ArticleModel
+            .find({ isArticleActive: true })
+            .populate("author", "firstName lastName")
+            .sort({ createdAt: -1 });
 
-    let articles = await ArticleModel
-        .find({ isArticleActive: true })
-        .populate("author", "firstName lastName")
-        .sort({ createdAt: -1 });
-
-    if (!articles) {
-        return res.status(401).json({ message: "Article not found" })
+        res.status(200).json({ message: "Articles found", payload: articles });
+    } catch (err) {
+        res.status(500).json({ message: "Failed to fetch articles", error: err.message });
     }
-    res.status(200).json({ message: "Article found", payload: articles })
 })
 
 
-//Read Article by ID (NEW ENDPOINT)
-userRoute.get('/article/:id', setAllowedRoles(["USER", "AUTHOR", "ADMIN"]), verifyToken, async (req, res) => {
-    
-    let articleId = req.params.id;
-    
-    let article = await ArticleModel.findById(articleId)
-        .populate("author", "firstName lastName email");
+//Read Article by ID (Publicly accessible)
+userRoute.get('/article/:id', async (req, res) => {
+    try {
+        let articleId = req.params.id;
+        let article = await ArticleModel.findById(articleId)
+            .populate("author", "firstName lastName email")
+            .populate({
+                path: 'comments.user',
+                select: 'firstName lastName profileImageUrl'
+            });
+            
+        if (!article || !article.isArticleActive) {
+            return res.status(404).json({ error: "Article not found" });
+        }
         
-    if (!article || !article.isArticleActive) {
-        return res.status(404).json({ error: "Article not found" });
+        res.status(200).json({ payload: article });
+    } catch (err) {
+        res.status(500).json({ message: "Error fetching article", error: err.message });
     }
-    
-    res.status(200).json({ payload: article });
 })
 
 
@@ -129,16 +136,19 @@ res.status(201).json({
 });
 });
 
-//getting all the comments of an article
-userRoute.get('/comments/:articleId', setAllowedRoles(["USER", "AUTHOR", "ADMIN"]), verifyToken, async (req, res) => {
+//getting all the comments of an article (Publicly accessible)
+userRoute.get('/comments/:articleId', async (req, res) => {
+    try {
+        let articleId = req.params.articleId;
+        let article = await ArticleModel.findById(articleId).populate("comments.user", "firstName lastName email profileImageUrl");
 
-    let articleId = req.params.articleId;
-    let article = await ArticleModel.findById(articleId).populate("comments.user", "firstName lastName email");
-
-    if (!article) {
-        return res.status(404).json({ message: "Article not found" });
+        if (!article) {
+            return res.status(404).json({ message: "Article not found" });
+        }
+        res.status(200).json({ payload: article.comments });
+    } catch (err) {
+        res.status(500).json({ message: "Error fetching comments", error: err.message });
     }
-    res.status(200).json({ payload: article.comments });
 });
 
 

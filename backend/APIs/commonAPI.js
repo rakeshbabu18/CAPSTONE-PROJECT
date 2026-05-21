@@ -100,6 +100,31 @@ commonRouter.get("/logout",async (req,res)=>{
     res.json({message:"logout successfully"})
 })
 
+//forgot-password
+commonRouter.post('/forgot-password', async (req, res, next) => {
+    try {
+        const { email, newPassword } = req.body;
+
+        if (!email || !newPassword) {
+            return res.status(400).json({ message: "Email and new password are required" });
+        }
+
+        const user = await UserTypeModel.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ message: "User not found with this email" });
+        }
+
+        // Hash new password
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        user.password = hashedPassword;
+        await user.save();
+
+        res.status(200).json({ message: "Password updated successfully" });
+    } catch (err) {
+        next(err);
+    }
+});
+
 //changing password route (protected)
 commonRouter.put('/change-password', setAllowedRoles(["USER", "AUTHOR", "ADMIN"]), verifyToken, async (req, res, next) => {
     try {
