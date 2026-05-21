@@ -91,12 +91,6 @@ function Home() {
           </div>
         )}
 
-        {!loading && articles.length === 0 && (
-          <div className="text-center py-20 bg-white rounded-2xl border-2 border-dashed border-gray-200 w-full">
-            <p className="text-gray-500 text-lg">No articles have been published yet.</p>
-          </div>
-        )}
-
         <div className="mt-16 text-center border-t border-gray-100 pt-10 w-full">
           <p className="text-gray-500 mb-4 font-medium italic">Want to join the conversation?</p>
           <div className="flex gap-4 justify-center">
