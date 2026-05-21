@@ -33,22 +33,21 @@ app.use('/author-api',authorRoute)
 app.use('/admin-api',adminRoute)
 app.use('/common-api',commonRouter)
 
+// Serve frontend static files
+app.use(exp.static(path.join(__dirname, '../Frontend/dist')));
+
 // Fallback to index.html for React Router (Single Page Application)
-// Reverting to common name for the parameter as older/strict versions of path-to-regexp often want this
-app.get('*any', (req, res, next) => {
+app.get('/*', (req, res, next) => {
     // If the request starts with any of our API prefixes, let it fall through to the 404 handler
-    if (req.path.startsWith('/users-api') || 
-        req.path.startsWith('/author-api') || 
-        req.path.startsWith('/admin-api') || 
-        req.path.startsWith('/common-api')) {
+    if (req.url.startsWith('/users-api') || 
+        req.url.startsWith('/author-api') || 
+        req.url.startsWith('/admin-api') || 
+        req.url.startsWith('/common-api')) {
         return next();
     }
     // Otherwise, serve the frontend
     res.sendFile(path.join(__dirname, '../Frontend/dist/index.html'));
 });
-
-// Serve frontend static files
-app.use(exp.static(path.join(__dirname, '../Frontend/dist')));
 
 //connect to database
 const connection=async()=>{
