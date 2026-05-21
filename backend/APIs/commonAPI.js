@@ -136,8 +136,21 @@ commonRouter.put('/change-password', setAllowedRoles(["USER", "AUTHOR", "ADMIN"]
 
 //handling refresh
 commonRouter.get('/check-auth', setAllowedRoles(["USER", "AUTHOR", "ADMIN"]), verifyToken, async (req, res) => {
-    res.status(200).json({
-        message:"unauthorized",
-        payload:req.user
-    })
+    try {
+        const user = await UserTypeModel.findById(req.user.userId).select("-password");
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        
+        // Convert to object and add userId for consistency with login payload
+        const userObj = user.toObject();
+        userObj.userId = userObj._id;
+
+        res.status(200).json({
+            message: "Authorized",
+            payload: userObj
+        });
+    } catch (err) {
+        res.status(500).json({ message: "Server error during auth check" });
+    }
 });

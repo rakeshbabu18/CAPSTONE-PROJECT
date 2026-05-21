@@ -55,7 +55,7 @@ app.use(exp.static(path.join(__dirname, '../Frontend/dist')));
 connection()
 
 // Fallback to index.html for React Router (Single Page Application)
-app.get('*', (req, res, next) => {
+app.get('*any', (req, res, next) => {
     // Check if the request is for an API
     if (req.url.startsWith('/users-api') || 
         req.url.startsWith('/author-api') || 
