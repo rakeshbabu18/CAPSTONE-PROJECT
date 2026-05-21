@@ -33,38 +33,39 @@ app.use('/author-api',authorRoute)
 app.use('/admin-api',adminRoute)
 app.use('/common-api',commonRouter)
 
+// Fallback to index.html for React Router (Single Page Application)
+// Reverting to common name for the parameter as older/strict versions of path-to-regexp often want this
+app.get('*any', (req, res, next) => {
+    // If the request starts with any of our API prefixes, let it fall through to the 404 handler
+    if (req.path.startsWith('/users-api') || 
+        req.path.startsWith('/author-api') || 
+        req.path.startsWith('/admin-api') || 
+        req.path.startsWith('/common-api')) {
+        return next();
+    }
+    // Otherwise, serve the frontend
+    res.sendFile(path.join(__dirname, '../Frontend/dist/index.html'));
+});
+
 // Serve frontend static files
 app.use(exp.static(path.join(__dirname, '../Frontend/dist')));
 
 //connect to database
+const connection=async()=>{
+    try{
+    await connect(process.env.DB_URL)
 
-    const connection=async()=>{
-        try{
-        await connect(process.env.DB_URL)
-
-        const port = process.env.PORT || 4000;
-        app.listen(port,()=>{
-         console.log(`Server running on port ${port}`)
-         console.log(`connection successful`)
-        })
-    }catch(err){
-        console.error("DB connection failed:", err)
-        process.exit(1)
-    }
+    const port = process.env.PORT || 4000;
+    app.listen(port,()=>{
+     console.log(`Server running on port ${port}`)
+     console.log(`connection successful`)
+    })
+}catch(err){
+    console.error("DB connection failed:", err)
+    process.exit(1)
+}
 }
 connection()
-
-// Fallback to index.html for React Router (Single Page Application)
-app.get('*any', (req, res, next) => {
-    // Check if the request is for an API
-    if (req.url.startsWith('/users-api') || 
-        req.url.startsWith('/author-api') || 
-        req.url.startsWith('/admin-api') || 
-        req.url.startsWith('/common-api')) {
-        return next();
-    }
-    res.sendFile(path.join(__dirname, '../Frontend/dist/index.html'));
-});
 
 //handling invalid path
 app.use((req,res)=>{

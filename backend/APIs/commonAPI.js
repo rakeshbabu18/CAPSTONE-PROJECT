@@ -179,3 +179,16 @@ commonRouter.get('/check-auth', setAllowedRoles(["USER", "AUTHOR", "ADMIN"]), ve
         res.status(500).json({ message: "Server error during auth check" });
     }
 });
+
+// route for fetching all articles in home page
+commonRouter.get('/articles', async (req, res) => {
+    try {
+        const articles = await ArticleModel.find().populate('author', 'firstName lastName profileImageUrl');
+        res.status(200).json({
+            message: "Articles fetched successfully",
+            payload: articles
+        });
+    } catch (err) {
+        res.status(500).json({ message: "Failed to fetch articles" });
+    }
+});
