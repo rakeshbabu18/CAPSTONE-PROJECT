@@ -16,7 +16,7 @@ function Home() {
       setLoading(true)
       // Call the existing articles endpoint
       // No withCredentials here to avoid triggering session checks if not needed
-      let res = await axios.get("/users-api/articles")
+      let res = await axios.get("/common-api/articles")
       console.log("Full articles response data:", res.data)
       const articlesData = res.data.payload || res.data;
       setArticles(Array.isArray(articlesData) ? articlesData : []);
