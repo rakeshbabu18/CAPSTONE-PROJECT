@@ -1,16 +1,55 @@
-# React + Vite
+# Blog App - Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The frontend of the Blog App is built with React, Vite, and Tailwind CSS. It provides an interactive interface for reading, writing, and managing blog articles.
 
-Currently, two official plugins are available:
+## Features
+- Responsive Landing Page with recent articles
+- User, Author, and Admin Dashboards
+- Protected Routes based on authentication status
+- Article creation and editing (Author only)
+- Global state management using Zustand
+- User notifications via React Hot Toast
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Prerequisites
+- Node.js installed
+- Backend server running (default port 4000)
 
-## React Compiler
+## Installation
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+1. Navigate to the frontend directory:
+   ```bash
+   cd Frontend
+   ```
 
-## Expanding the ESLint configuration
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+   ```
+
+## Development
+
+- Start the development server:
+  ```bash
+  npm run dev
+  ```
+
+- Build for production:
+  ```bash
+  npm run build
+  ```
+
+## Packages Installed
+
+| Package | Purpose |
+| :--- | :--- |
+| `react` / `react-dom` | UI library |
+| `react-router` | Navigation and routing |
+| `axios` | HTTP client for API requests |
+| `zustand` | State management (Auth state) |
+| `react-hook-form` | Form handling and validation |
+| `react-hot-toast` | Toast notifications |
+| `tailwindcss` | Utility-first CSS framework |
+| `vite` | Next-generation frontend tooling |
+
