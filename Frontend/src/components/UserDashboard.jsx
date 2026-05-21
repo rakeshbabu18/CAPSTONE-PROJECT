@@ -28,7 +28,9 @@ function UserDashboard() {
       let res = await axios.get("/users-api/articles", {
         withCredentials:true
       });
-      setArticles(res.data.payload || []);
+      console.log("Dashboard articles response:", res.data);
+      const articlesData = res.data.payload || res.data;
+      setArticles(Array.isArray(articlesData) ? articlesData : []);
     } catch(err) {
       console.error("Error fetching articles:", err);
       setError(err.response?.data?.message || "Failed to load articles");

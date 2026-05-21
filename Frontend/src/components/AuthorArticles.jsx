@@ -38,10 +38,11 @@ function AuthorArticles() {
 
       try {
         const ownRes = await axios.get(`/author-api/articles/${authorId}?includeInactive=true`, { withCredentials: true });
-        const allOwnArticles = ownRes.data.payload || [];
+        console.log("Author articles response:", ownRes.data);
+        const allOwnArticles = ownRes.data.payload || ownRes.data || [];
 
-        setActiveArticles(allOwnArticles.filter((article) => article.isArticleActive !== false));
-        setDeletedArticles(allOwnArticles.filter((article) => article.isArticleActive === false));
+        setActiveArticles(Array.isArray(allOwnArticles) ? allOwnArticles.filter((article) => article.isArticleActive !== false) : []);
+        setDeletedArticles(Array.isArray(allOwnArticles) ? allOwnArticles.filter((article) => article.isArticleActive === false) : []);
       } catch (err) {
         console.log(err);
         setError(err.response?.data?.message || err.response?.data?.error || "Failed to fetch articles");

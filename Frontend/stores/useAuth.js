@@ -98,7 +98,8 @@ export const useAuth = create(
               loading: false,
               error: null
             })
-            return res.data.payload;
+            console.log("readArticles raw response:", res.data);
+            return res.data.payload || res.data;
           }
         } catch(err) {
           set({
@@ -113,14 +114,15 @@ export const useAuth = create(
         try {
           const res = await axios.get("/common-api/check-auth", { withCredentials: true });
           if(res.status===200){
-            const userData = res.data.payload;
+            console.log("Full check-auth response data:", res.data);
+            const userData = res.data.payload || res.data;
             set({
               loading:false,
               error:null,
-              currentUser: userData || null,
-              isAuthenticated: !!userData
+              currentUser: userData && typeof userData === 'object' && userData.email ? userData : null,
+              isAuthenticated: !!(userData && typeof userData === 'object' && userData.email)
             })
-            console.log("Auth check successful, user data:", userData);
+            console.log("Auth check successful, processed user data:", userData);
           }
         } catch (err) {
           // If refresh fails, clear auth state

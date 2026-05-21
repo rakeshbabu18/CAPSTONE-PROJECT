@@ -33,7 +33,9 @@ function AdminDashboard() {
     try {
       setLoading(true)
       const res = await axios.get('/admin-api/users', { withCredentials: true })
-      setUsers(res.data.payload || [])
+      console.log("Admin users response:", res.data);
+      const usersData = res.data.payload || res.data;
+      setUsers(Array.isArray(usersData) ? usersData : [])
     } catch (err) {
       toast.error('Failed to load users')
     } finally {
@@ -45,7 +47,9 @@ function AdminDashboard() {
     try {
       setLoading(true)
       const res = await axios.get('/admin-api/articles', { withCredentials: true })
-      setArticles(res.data.payload || [])
+      console.log("Admin articles response:", res.data);
+      const articlesData = res.data.payload || res.data;
+      setArticles(Array.isArray(articlesData) ? articlesData : [])
     } catch (err) {
       toast.error('Failed to load articles')
     } finally {

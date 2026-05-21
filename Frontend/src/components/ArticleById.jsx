@@ -50,8 +50,8 @@ function ArticleByID() {
 
       try {
         const res = await axios.get(`/users-api/article/${id}`);
-
-        setArticle(res.data.payload);
+        console.log("Article detail response:", res.data);
+        setArticle(res.data.payload || res.data);
       } catch (err) {
         setError(err.response?.data?.error);
       } finally {
@@ -77,7 +77,9 @@ function ArticleByID() {
     try {
       setCommentsLoading(true);
       const res = await axios.get(`/users-api/comments/${id}`);
-      setComments(res.data.payload || []);
+      console.log("Comments response:", res.data);
+      const commentsData = res.data.payload || res.data;
+      setComments(Array.isArray(commentsData) ? commentsData : []);
     } catch (err) {
       toast.error(err.response?.data?.error || err.response?.data?.message || "Failed to load comments");
     } finally {
